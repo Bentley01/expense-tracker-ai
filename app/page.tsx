@@ -6,16 +6,19 @@ import ExpenseList from '@/components/ExpenseList';
 import ExpenseFilters from '@/components/ExpenseFilters';
 import SummaryCards from '@/components/SummaryCards';
 import CategoryChart from '@/components/CategoryChart';
+import ExportModal from '@/components/ExportModal';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useFilters } from '@/hooks/useFilters';
-import { calculateSummary, downloadCSV } from '@/utils/analytics';
-import { Expense, ExpenseFormData, Category } from '@/types/expense';
+import { calculateSummary } from '@/utils/analytics';
+import { performExport } from '@/utils/exportAdvanced';
+import { Expense, ExpenseFormData } from '@/types/expense';
 
 export default function Home() {
   const { expenses, isLoading, addExpense, updateExpense, deleteExpense } = useExpenses();
   const { filters, filteredExpenses, updateFilter, resetFilters } = useFilters(expenses);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [showForm, setShowForm] = useState(true);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const summary = useMemo(() => calculateSummary(filteredExpenses), [filteredExpenses]);
 
@@ -44,8 +47,16 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleExportCSV = () => {
-    downloadCSV(filteredExpenses, `expenses-${new Date().toISOString().split('T')[0]}.csv`);
+  const handleExportClick = () => {
+    setShowExportModal(true);
+  };
+
+  const handleExport = async (
+    expenses: Expense[],
+    format: 'csv' | 'json' | 'pdf',
+    filename: string
+  ) => {
+    await performExport(expenses, format, filename);
   };
 
   if (isLoading) {
@@ -76,12 +87,25 @@ export default function Home() {
               >
                 {showForm ? 'Hide Form' : 'Show Form'}
               </button>
-              {filteredExpenses.length > 0 && (
+              {expenses.length > 0 && (
                 <button
-                  onClick={handleExportCSV}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+                  onClick={handleExportClick}
+                  className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-md hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg font-medium flex items-center gap-2"
                 >
-                  Export CSV
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Export Data
                 </button>
               )}
             </div>
@@ -152,6 +176,14 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Export Modal */}
+      <ExportModal
+        expenses={expenses}
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExport}
+      />
     </div>
   );
 }
