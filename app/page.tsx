@@ -6,6 +6,7 @@ import ExpenseList from '@/components/ExpenseList';
 import ExpenseFilters from '@/components/ExpenseFilters';
 import SummaryCards from '@/components/SummaryCards';
 import CategoryChart from '@/components/CategoryChart';
+import CloudExportPanel from '@/components/CloudExportPanel';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useFilters } from '@/hooks/useFilters';
 import { calculateSummary, downloadCSV } from '@/utils/analytics';
@@ -16,6 +17,7 @@ export default function Home() {
   const { filters, filteredExpenses, updateFilter, resetFilters } = useFilters(expenses);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [showForm, setShowForm] = useState(true);
+  const [showCloudPanel, setShowCloudPanel] = useState(false);
 
   const summary = useMemo(() => calculateSummary(filteredExpenses), [filteredExpenses]);
 
@@ -76,12 +78,15 @@ export default function Home() {
               >
                 {showForm ? 'Hide Form' : 'Show Form'}
               </button>
-              {filteredExpenses.length > 0 && (
+              {expenses.length > 0 && (
                 <button
-                  onClick={handleExportCSV}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+                  onClick={() => setShowCloudPanel(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-md hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl font-medium flex items-center gap-2"
                 >
-                  Export CSV
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                  </svg>
+                  Cloud Export
                 </button>
               )}
             </div>
@@ -152,6 +157,13 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Cloud Export Panel */}
+      <CloudExportPanel
+        expenses={expenses}
+        isOpen={showCloudPanel}
+        onClose={() => setShowCloudPanel(false)}
+      />
     </div>
   );
 }
