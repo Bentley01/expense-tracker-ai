@@ -64,3 +64,16 @@ export const CATEGORY_ICONS: Record<Category, string> = {
   Bills: '📄',
   Other: '📌'
 };
+
+export interface VendorData {
+  vendor: string;
+  totalAmount: number;
+  transactionCount: number;
+  lastTransactionDate: string;
+  primaryCategory: Category;
+  categoryBreakdown: {
+    category: Category;
+    amount: number;
+    count: number;
+  }[];
+}

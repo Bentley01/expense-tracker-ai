@@ -73,9 +73,17 @@ export default function Home() {
             <div className="flex gap-3">
               <Link
                 href="/categories"
-                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium inline-flex items-center gap-2"
               >
-                Top Categories
+                <span>📊</span>
+                <span>Top Categories</span>
+              </Link>
+              <Link
+                href="/top-vendors"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium inline-flex items-center gap-2"
+              >
+                <span>🏪</span>
+                <span>Top Vendors</span>
               </Link>
               <button
                 onClick={() => setShowForm(!showForm)}
