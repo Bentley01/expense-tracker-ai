@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import ExpenseForm from '@/components/ExpenseForm';
 import ExpenseList from '@/components/ExpenseList';
 import ExpenseFilters from '@/components/ExpenseFilters';
@@ -70,6 +71,12 @@ export default function Home() {
               <p className="text-gray-600 mt-1">Manage your personal finances with ease</p>
             </div>
             <div className="flex gap-3">
+              <Link
+                href="/categories"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium"
+              >
+                Top Categories
+              </Link>
               <button
                 onClick={() => setShowForm(!showForm)}
                 className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium"
