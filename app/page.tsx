@@ -72,6 +72,13 @@ export default function Home() {
             </div>
             <div className="flex gap-3">
               <Link
+                href="/monthly-insights"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium inline-flex items-center gap-2"
+              >
+                <span>💡</span>
+                <span>Monthly Insights</span>
+              </Link>
+              <Link
                 href="/categories"
                 className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium inline-flex items-center gap-2"
               >
