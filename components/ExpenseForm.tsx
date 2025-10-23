@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-import { ExpenseFormData, CATEGORIES, Category, Expense } from '@/types/expense';
+import { ExpenseFormData, Category, Expense, CustomCategory } from '@/types/expense';
 import { getTodayDate, isValidAmount } from '@/utils/format';
+import { storage } from '@/utils/storage';
 
 interface ExpenseFormProps {
   onSubmit: (data: ExpenseFormData) => void;
@@ -26,6 +27,14 @@ export default function ExpenseForm({
 
   const [errors, setErrors] = useState<Partial<Record<keyof ExpenseFormData, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof ExpenseFormData, boolean>>>({});
+  const [categories, setCategories] = useState<string[]>([]);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Load categories on mount
+  useEffect(() => {
+    setCategories(storage.getAllCategories());
+  }, []);
 
   // Populate form with initial data if editing
   useEffect(() => {
@@ -75,6 +84,31 @@ export default function ExpenseForm({
     setTouched(prev => ({ ...prev, [name]: true }));
     const error = validateField(name as keyof ExpenseFormData, value);
     setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  const handleAddNewCategory = () => {
+    const trimmedName = newCategoryName.trim();
+
+    if (!trimmedName) {
+      alert('Please enter a category name');
+      return;
+    }
+
+    if (storage.categoryExists(trimmedName)) {
+      alert('This category already exists');
+      return;
+    }
+
+    const newCategory: CustomCategory = {
+      name: trimmedName,
+      createdAt: new Date().toISOString(),
+    };
+
+    storage.addCustomCategory(newCategory);
+    setCategories(storage.getAllCategories());
+    setFormData(prev => ({ ...prev, category: trimmedName }));
+    setNewCategoryName('');
+    setShowNewCategoryInput(false);
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -171,20 +205,72 @@ export default function ExpenseForm({
         <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
           Category *
         </label>
-        <select
-          id="category"
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-        >
-          {CATEGORIES.map(category => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
+        <div className="flex gap-2">
+          <select
+            id="category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            {categories.map(category => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setShowNewCategoryInput(!showNewCategoryInput)}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+            title="Add new category"
+          >
+            ➕
+          </button>
+        </div>
+
+        {/* New Category Input */}
+        {showNewCategoryInput && (
+          <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
+            <label htmlFor="newCategory" className="block text-sm font-medium text-gray-700 mb-1">
+              New Category Name
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                id="newCategory"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddNewCategory();
+                  }
+                }}
+                placeholder="e.g., Health, Education..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <button
+                type="button"
+                onClick={handleAddNewCategory}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewCategoryInput(false);
+                  setNewCategoryName('');
+                }}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Description */}
